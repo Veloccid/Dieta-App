@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dieta anti-gonfiore</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#065f46">
+<link rel="icon" href="data:,">
+<style>
+  :root{
+    --bg:#f1f0ed; --card:#ffffff; --ink:#1c1917; --ink-soft:#78716c; --line:#e7e5e4;
+    --brand:#065f46; --brand-soft:#ecfdf5;
+    --ok:#059669; --ok-soft:#ecfdf5;
+    --warn:#d97706; --warn-soft:#fffbeb;
+    --bad:#e11d48; --bad-soft:#fff1f2;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);}
+  .shell{min-height:100vh;display:flex;justify-content:center;}
+  .app{width:100%;max-width:440px;background:var(--bg);display:flex;flex-direction:column;min-height:100vh;}
+  @media(min-width:480px){ .app{box-shadow:0 0 40px rgba(0,0,0,.08); margin:24px 0; min-height:calc(100vh - 48px); border-radius:28px; overflow:hidden;} }
+  header.topbar{display:flex;align-items:center;gap:10px;padding:22px 20px 14px;}
+  .logo{width:40px;height:40px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+  h1{font-family:Georgia,serif;font-size:18px;margin:0;letter-spacing:-.2px;line-height:1.2;}
+  .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin:2px 0 0;}
+  main{flex:1;padding:0 20px 100px;}
+  nav.bottomnav{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 10px calc(8px + env(safe-area-inset-bottom));}
+  .navbtn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;padding:6px 6px;cursor:pointer;color:var(--ink-soft);font-size:10px;}
+  .navbtn .ic{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .navbtn.active{color:var(--brand);font-weight:600;}
+  .navbtn.active .ic{background:var(--brand);color:#fff;}
+
+  .segmented{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px;}
+  .seg{border:none;background:none;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:500;color:var(--ink-soft);cursor:pointer;}
+  .seg.active{background:var(--brand);color:#fff;}
+  .toprow{display:flex;align-items:center;justify-content:space-between;margin:14px 0 14px;}
+  .resetbtn{border:none;background:none;color:var(--ink-soft);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:4px;}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px;margin-bottom:12px;}
+  .card.dim{background:#ebe9e6;opacity:.65;}
+  .cardhead{display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+  .cardhead .left{display:flex;align-items:center;gap:10px;}
+  .ic-circle{width:36px;height:36px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .ic-circle.dim{background:#ddd9d4;color:#a8a29e;}
+  .cardtitle{font-family:Georgia,serif;font-size:15px;margin:0;line-height:1.2;}
+  .cardsub{font-size:12px;color:var(--ok);margin:2px 0 0;}
+  .cardsub.dim{color:#a8a29e;}
+  .cardsub.muted{color:var(--ink-soft);}
+  .chev{color:#c4c0bb;font-size:13px;}
+
+  .counters{display:flex;align-items:center;gap:6px;}
+  .roundbtn{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--ink-soft);font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:0;}
+  .roundbtn.plus{background:var(--brand);border-color:var(--brand);color:#fff;}
+  .progress{height:6px;background:#efeceA;border-radius:99px;overflow:hidden;margin-top:10px;}
+  .progress > div{height:100%;border-radius:99px;background:var(--ok);transition:width .2s;}
+  .progress.full > div{background:var(--warn);}
+  .examplesbtn{margin-top:10px;border:none;background:none;color:var(--ink-soft);font-size:12px;cursor:pointer;padding:0;}
+
+  .itemlist{margin-top:8px;}
+  .item{display:flex;gap:9px;padding:8px 0;border-bottom:1px solid #f2f0ee;align-items:flex-start;}
+  .item:last-child{border-bottom:none;}
+  .dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+  .item-name{font-size:13.5px;margin:0;line-height:1.3;}
+  .item-note{font-size:11.5px;color:var(--ink-soft);margin:2px 0 0;}
+  .item-risk{font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;margin-left:auto;padding-left:6px;}
+
+  .search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:11px 16px;margin:14px 0;}
+  .search input{border:none;outline:none;background:none;font-size:14px;width:100%;color:var(--ink);}
+  .rule{display:flex;gap:7px;background:#f7f6f4;border-radius:10px;padding:9px 11px;font-size:12px;color:#57534e;margin-top:10px;}
+
+  .legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .legendchip{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:11px;}
+
+  .alcohead{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .alcohead .ic-circle{background:var(--warn-soft);color:var(--warn);}
+  .alcolist{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;}
+  .alcolist li{display:flex;gap:9px;font-size:13.5px;line-height:1.4;}
+  .alcolist b{font-weight:600;}
+  .alcosparkle{flex-shrink:0;}
+  .greencard{background:var(--ok-soft);border-color:#bbf0d8;}
+  .greencard .ic-circle{background:#fff;color:var(--ok);}
+  .greencard p.cardtitle{color:#065f46;}
+  .greencard .body{color:#065f46;font-size:13.5px;margin:0;}
+  .redcard{background:var(--bad-soft);border-color:#fecdd3;}
+  .redcard .ic-circle{background:#fff;color:var(--bad);}
+  .redcard p.cardtitle{color:#9f1239;}
+  .redcard .body{color:#9f1239;font-size:13.5px;margin:0;}
+  .footnote{display:flex;gap:7px;color:#a8a29e;font-size:11.5px;padding:4px 4px 18px;}
+
+  .introcard{background:#1c1917;border-radius:18px;padding:16px;margin-bottom:14px;}
+  .introcard p{color:#e7e5e4;font-size:13.5px;line-height:1.5;margin:0;}
+  .introcard b{color:#fff;}
+  .sectionlabel{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin:18px 2px 8px;}
+  .checklist{display:flex;flex-direction:column;gap:2px;}
+  .check-item{display:flex;align-items:flex-start;gap:10px;padding:9px 2px;cursor:pointer;}
+  .check-box{width:20px;height:20px;border-radius:7px;border:1.5px solid #d6d3ce;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;transition:background .15s;}
+  .check-text{font-size:13.5px;line-height:1.4;}
+  .check-item.done .check-box{background:var(--brand);border-color:var(--brand);}
+  .check-item.done .check-text{color:#a8a29e;text-decoration:line-through;}
+  .calmcard{background:var(--ok-soft);border:1px solid #bbf0d8;border-radius:18px;padding:15px;margin-top:16px;}
+  .calmcard p{color:#065f46;font-size:13px;line-height:1.5;margin:0;}
+  .calmcard .cardtitle{color:#065f46;margin-bottom:6px;}
+
+  .weekrow{display:flex;gap:6px;justify-content:space-between;margin:14px 0 6px;}
+  .daychip{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 2px;cursor:pointer;}
+  .daychip-name{font-size:10px;color:var(--ink-soft);}
+  .daychip-num{font-size:13px;font-weight:600;color:var(--ink);}
+  .daychip.istoday{border-color:var(--brand);}
+  .daychip.picked{background:var(--brand);}
+  .daychip.picked .daychip-name, .daychip.picked .daychip-num{color:#fff;}
+  .calbuttons{display:flex;flex-direction:column;gap:8px;margin:10px 0 4px;}
+  .calbtn{border:none;border-radius:12px;padding:11px;font-size:13px;font-weight:600;background:var(--brand);color:#fff;cursor:pointer;}
+  .calbtn.outline{background:#fff;border:1px solid var(--line);color:var(--ink);}
+  .addrow{display:flex;gap:8px;margin-top:8px;}
+  .addrow input{flex:1;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;outline:none;}
+  .addrow button{border:none;background:var(--brand);color:#fff;width:36px;border-radius:10px;font-size:16px;cursor:pointer;}
+
+  .backrow{display:flex;align-items:center;gap:8px;margin:4px 0 14px;cursor:pointer;}
+  .backrow .arrow{font-size:15px;color:var(--ink-soft);}
+  .backrow .label{font-size:13.5px;color:var(--ink-soft);font-weight:600;}
+
+  .menuitem{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 15px;margin-bottom:10px;cursor:pointer;}
+  .menuitem .left{display:flex;align-items:center;gap:12px;}
+  .menutitle{font-family:Georgia,serif;font-size:15px;margin:0;}
+  .menusub{font-size:11.5px;color:var(--ink-soft);margin:2px 0 0;}
+
+  .cardbody{font-size:13.5px;line-height:1.55;color:#44403c;margin:8px 0 0;}
+  .dosebadge{display:inline-block;background:var(--brand-soft);color:var(--brand);font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;margin-top:9px;}
+  .warnbadge{display:inline-block;background:var(--warn-soft);color:var(--warn);font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;margin-top:9px;}
+  .sourcelist{font-size:10.5px;color:#b5b1ab;line-height:1.7;padding:6px 4px 22px;}
+
+  .delbtn{margin-left:auto;color:#c4c0bb;font-size:14px;padding:2px 4px;flex-shrink:0;}
+</style>
+</head>
+<body>
+<div class="shell"><div class="app">
+  <header class="topbar">
+    <div class="logo">🍽️</div>
+    <div>
+      <h1>Dieta anti-gonfiore</h1>
+      <p class="eyebrow">Consultazione rapida</p>
+    </div>
+  </header>
+  <main id="content"></main>
+  <nav class="bottomnav">
+    <button class="navbtn" data-tab="oggi"><span class="ic">☀️</span>Oggi</button>
+    <button class="navbtn" data-tab="alimenti"><span class="ic">🔍</span>Alimenti</button>
+    <button class="navbtn" data-tab="allenamenti"><span class="ic">🏃</span>Corsa</button>
+    <button class="navbtn" data-tab="spesa"><span class="ic">🛒</span>Spesa</button>
+    <button class="navbtn" data-tab="altro"><span class="ic">⋯</span>Altro</button>
+  </nav>
+</div></div>
+
+<script>
+const RISK = {
+  ok: { label: "Via libera", color: "var(--ok)" },
+  moderato: { label: "Attenzione", color: "var(--warn)" },
+  alto: { label: "Limita/sostituisci", color: "var(--bad)" },
+};
+
+const CATEGORIES = [
+  { id:"magri", label:"Proteici magri", icon:"🥚", items:[
+    {name:"Affettato vegetale", risk:"moderato", note:"Scegli marche senza cipolla/aglio in polvere"},
+    {name:"Pasta di piselli", risk:"ok", note:"Porzione standard ok"},
+    {name:"Lupini", risk:"alto", note:"Porzioni piccole, non abituali"},
+    {name:"Nuggets / burger vegani", risk:"moderato", note:"Niente cipolla/aglio in polvere in etichetta"},
+    {name:"Cacioricotta, Feta", risk:"ok", note:"Porzioni standard ok"},
+    {name:"Fiocchi di formaggio, Ricotta", risk:"alto", note:"Versione delattosata o porzione piccola"},
+  ]},
+  { id:"grassi", label:"Proteici grassi", icon:"🧀", items:[
+    {name:"Uova", risk:"ok", note:"Libere, nessuna restrizione"},
+    {name:"Tofu compatto", risk:"ok", note:"Da preferire"},
+    {name:"Burger di soia", risk:"moderato", note:"Controlla cipolla/aglio/frumento"},
+    {name:"Brie, Camembert", risk:"ok", note:"Stagionati/erborinati: lattosio già ridotto"},
+    {name:"Mozzarella di bufala", risk:"alto", note:"Riduci porzione o alterna con stagionati"},
+    {name:"Caciotta, Scamorza", risk:"moderato", note:"Porzioni standard ok"},
+    {name:"Crescenza, Stracchino", risk:"alto", note:"Riduci / alterna con stagionati"},
+    {name:"Taleggio", risk:"moderato", note:"Ok"},
+    {name:"Parmigiano, Grana, Pecorino stag., Emmenthal stag., Caciocavallo, Burrino", risk:"ok", note:"Da preferire sempre"},
+  ]},
+  { id:"legumi", label:"Legumi", icon:"🫘",
+    rule:"Porzione: 30-40g sgocciolati, in scatola e ben sciacquati. Mai due legumi diversi nello stesso pasto.",
+    items:[
+      {name:"Lenticchie", risk:"ok", note:"Le più digeribili della scala"},
+      {name:"Piselli", risk:"ok", note:""},
+      {name:"Ceci", risk:"moderato", note:"Max 30-40g sgocciolati"},
+      {name:"Fagioli, cannellini, fave", risk:"alto", note:"Le meno digeribili, porzioni piccole"},
+    ]},
+  { id:"grassiveg", label:"Grassi vegetali", icon:"🫒", always:true, items:[
+    {name:"Avocado 35g", risk:"moderato", note:"Non aumentare la porzione"},
+    {name:"Burro di arachidi 15g", risk:"ok", note:"Libero"},
+    {name:"Hummus 30g", risk:"moderato", note:"Preferisci homemade senza aglio"},
+    {name:"Olio 10g", risk:"ok", note:"Libero"},
+    {name:"Olive 30g", risk:"ok", note:"Non marinate con aglio"},
+    {name:"Sughi grassi 15g", risk:"alto", note:"Solo homemade, senza cipolla/aglio fresco"},
+  ]},
+  { id:"condimenti", label:"Condimenti magri", icon:"🧂", always:true, items:[
+    {name:"Aceto, limone", risk:"ok", note:"Liberi"},
+    {name:"Salsa di soia / tamari", risk:"ok", note:"Preferisci il tamari (senza glutine)"},
+    {name:"Spezie pure", risk:"ok", note:"No ai mix con cipolla/aglio in polvere"},
+    {name:"Salsa BBQ industriale", risk:"alto", note:"Quasi sempre cipolla/aglio + sciroppo: fattela in casa"},
+  ]},
+  { id:"cereali", label:"Cereali", icon:"🌾", items:[
+    {name:"Pane 100g", risk:"moderato", note:"Preferisci lievitazione naturale (lievito madre)"},
+    {name:"Pasta 85g", risk:"ok", note:"Porzione standard ok"},
+    {name:"Piadina", risk:"moderato", note:"Stessa attenzione del pane"},
+    {name:"Patate 350g", risk:"ok", note:"Ottime, libere"},
+    {name:"Riso 90g", risk:"ok", note:"Ottimo, libero"},
+  ]},
+  { id:"verdure", label:"Verdure", icon:"🥬", always:true, items:[
+    {name:"Zucchine, carote, patate", risk:"ok", note:"Sempre"},
+    {name:"Lattuga, insalata, spinaci", risk:"ok", note:"Sempre"},
+    {name:"Cetrioli, peperoni, melanzane", risk:"ok", note:"Sempre"},
+    {name:"Pomodori", risk:"moderato", note:"Porzione moderata"},
+    {name:"Finocchi, fagiolini, zucca", risk:"moderato", note:"Porzione piccola"},
+    {name:"Cipolla, aglio (anche in polvere)", risk:"alto", note:"Evita sempre, in ogni forma"},
+    {name:"Porro, cavolfiore, funghi, carciofi", risk:"alto", note:"Limita / evita"},
+    {name:"Asparagi, cavolo, verza, broccoli", risk:"alto", note:"Ok solo in porzioni piccole"},
+  ]},
+];
+
+const TARGETS = {
+  magri:{pranzo:4,cena:3}, grassi:{pranzo:0,cena:3}, legumi:{pranzo:3,cena:0}, cereali:{pranzo:4,cena:null},
+};
+
+const SPESA_BASE = [
+  {id:"uova", name:"Uova", cat:"Proteine"},
+  {id:"tofu", name:"Tofu compatto", cat:"Proteine"},
+  {id:"parmigiano", name:"Parmigiano o Grana", cat:"Proteine"},
+  {id:"feta", name:"Feta o Cacioricotta", cat:"Proteine"},
+  {id:"pecorino", name:"Formaggio stagionato (Pecorino/Caciocavallo)", cat:"Proteine"},
+  {id:"lenticchie", name:"Lenticchie in scatola", cat:"Legumi"},
+  {id:"piselli", name:"Piselli in scatola", cat:"Legumi"},
+  {id:"riso", name:"Riso", cat:"Cereali"},
+  {id:"patate", name:"Patate", cat:"Cereali"},
+  {id:"pasta", name:"Pasta", cat:"Cereali"},
+  {id:"pane", name:"Pane a lievitazione naturale", cat:"Cereali"},
+  {id:"zucchine", name:"Zucchine", cat:"Verdure"},
+  {id:"carote", name:"Carote", cat:"Verdure"},
+  {id:"insalata", name:"Insalata o spinaci", cat:"Verdure"},
+  {id:"cetrioli", name:"Cetrioli", cat:"Verdure"},
+  {id:"peperoni", name:"Peperoni", cat:"Verdure"},
+  {id:"melanzane", name:"Melanzane", cat:"Verdure"},
+  {id:"olio", name:"Olio EVO", cat:"Grassi e condimenti"},
+  {id:"olive", name:"Olive", cat:"Grassi e condimenti"},
+  {id:"burroarachidi", name:"Burro di arachidi", cat:"Grassi e condimenti"},
+  {id:"limone", name:"Limone", cat:"Grassi e condimenti"},
+];
+const SPESA_CAT_ORDER = ["Proteine","Legumi","Cereali","Verdure","Grassi e condimenti","Altro"];
+const DAY_NAMES = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
+const DAY_ICS = ["MO","TU","WE","TH","FR","SA","SU"];
+
+function freshSpesaItems(){
+  return SPESA_BASE.map(it=>Object.assign({checked:false,custom:false}, it));
+}
+function todayIndex(){ const day = new Date().getDay(); return day===0?6:day-1; }
+function getWeekDates(d){
+  d = d || new Date();
+  const date = new Date(d.getTime()); date.setHours(0,0,0,0);
+  const idx = date.getDay()===0?6:date.getDay()-1;
+  const monday = new Date(date); monday.setDate(date.getDate()-idx);
+  const days = [];
+  for(let i=0;i<7;i++){ const d2=new Date(monday); d2.setDate(monday.getDate()+i); days.push(d2); }
+  return days;
+}
+function nextOccurrence(dayIndex){
+  const weekDates = getWeekDates();
+  const target = new Date(weekDates[dayIndex]);
+  target.setHours(18,0,0,0);
+  if(target.getTime() < new Date().getTime()) target.setDate(target.getDate()+7);
+  return target;
+}
+function pad(n){ return n<10? "0"+n : ""+n; }
+function fmtCal(d){ return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"T"+pad(d.getHours())+pad(d.getMinutes())+"00"; }
+function escapeICS(text){ return String(text).replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\n/g,"\\n"); }
+function spesaListText(){
+  const grouped = {};
+  state.spesaItems.forEach(it=>{ (grouped[it.cat]=grouped[it.cat]||[]).push(it.name); });
+  return SPESA_CAT_ORDER.filter(c=>grouped[c]&&grouped[c].length).map(c=>c+": "+grouped[c].join(", ")).join("\n");
+}
+function openGoogleCalendar(){
+  const start = nextOccurrence(state.spesaDay);
+  const end = new Date(start.getTime()+30*60000);
+  const params = new URLSearchParams({
+    action:"TEMPLATE",
+    text:"Spesa settimanale 🛒",
+    dates: fmtCal(start)+"/"+fmtCal(end),
+    details: spesaListText(),
+    recur: "RRULE:FREQ=WEEKLY;BYDAY="+DAY_ICS[state.spesaDay],
+  });
+  window.open("https://calendar.google.com/calendar/render?"+params.toString(), "_blank");
+}
+function downloadICS(){
+  const start = nextOccurrence(state.spesaDay);
+  const end = new Date(start.getTime()+30*60000);
+  const now = new Date();
+  const stamp = now.getFullYear()+pad(now.getMonth()+1)+pad(now.getDate())+"T"+pad(now.getHours())+pad(now.getMinutes())+pad(now.getSeconds())+"Z";
+  const uid = "spesa-"+Date.now()+"@dieta-antigonfiore";
+  const ics = [
+    "BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Dieta anti-gonfiore//IT","CALSCALE:GREGORIAN",
+    "BEGIN:VEVENT","UID:"+uid,"DTSTAMP:"+stamp,"DTSTART:"+fmtCal(start),"DTEND:"+fmtCal(end),
+    "RRULE:FREQ=WEEKLY;BYDAY="+DAY_ICS[state.spesaDay],
+    "SUMMARY:Spesa settimanale","DESCRIPTION:"+escapeICS(spesaListText()),
+    "END:VEVENT","END:VCALENDAR"
+  ].join("\r\n");
+  const blob = new Blob([ics], {type:"text/calendar;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "spesa-settimanale.ics";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+}
+
+function getWeekKey(d){
+  d = d || new Date();
+  const date = new Date(d.getTime()); date.setHours(0,0,0,0);
+  const jan1 = new Date(date.getFullYear(),0,1);
+  const days = Math.floor((date - jan1)/86400000);
+  const week = Math.ceil((days + jan1.getDay() + 1)/7);
+  return date.getFullYear()+"-W"+week;
+}
+function emptyCounts(){ return {magri:{pranzo:0,cena:0},grassi:{pranzo:0,cena:0},legumi:{pranzo:0,cena:0},cereali:{pranzo:0,cena:0}}; }
+
+let state = {
+  tab:"oggi",
+  meal: (new Date().getHours() < 15 ? "pranzo" : "cena"),
+  counts: emptyCounts(),
+  query:"",
+  openAlim: {}, // accordion state Alimenti tab
+  openCard: {}, // "esempi" expand state Oggi tab
+  checked: {}, // checklist Recupero tab (solo in sessione, non persistito)
+  spesaItems: freshSpesaItems(),
+  spesaDay: todayIndex(),
+  spesaInput: "",
+  altroView: null, // null | "alcol" | "recupero" | "integratori"
+};
+
+(function loadStorage(){
+  try{
+    const raw = localStorage.getItem("dieta-tracker-v1");
+    if(raw){
+      const data = JSON.parse(raw);
+      if(data.weekKey === getWeekKey() && data.counts){
+        state.counts = Object.assign(emptyCounts(), data.counts);
+        return;
+      }
+    }
+  }catch(e){}
+  saveStorage();
+})();
+function saveStorage(){
+  try{ localStorage.setItem("dieta-tracker-v1", JSON.stringify({weekKey:getWeekKey(), counts:state.counts})); }catch(e){}
+}
+
+(function loadSpesa(){
+  try{
+    const raw = localStorage.getItem("dieta-spesa-v1");
+    if(raw){
+      const data = JSON.parse(raw);
+      if(data.weekKey === getWeekKey() && Array.isArray(data.items)){ state.spesaItems = data.items; return; }
+    }
+  }catch(e){}
+  state.spesaItems = freshSpesaItems();
+  saveSpesa();
+})();
+function saveSpesa(){
+  try{ localStorage.setItem("dieta-spesa-v1", JSON.stringify({weekKey:getWeekKey(), items:state.spesaItems})); }catch(e){}
+}
+(function loadSpesaDay(){
+  try{
+    const raw = localStorage.getItem("dieta-spesa-day-v1");
+    if(raw!==null){ state.spesaDay = parseInt(raw,10); return; }
+  }catch(e){}
+})();
+function saveSpesaDay(){
+  try{ localStorage.setItem("dieta-spesa-day-v1", String(state.spesaDay)); }catch(e){}
+}
+function addCustomSpesaItem(){
+  const val = (state.spesaInput||"").trim();
+  if(!val) return;
+  state.spesaItems.push({id:"custom-"+Date.now(), name:val, cat:"Altro", checked:false, custom:true});
+  state.spesaInput = "";
+  saveSpesa();
+  render();
+}
+
+function itemRow(it){
+  const r = RISK[it.risk] || RISK.ok;
+  return `<div class="item">
+    <span class="dot" style="background:${r.color}"></span>
+    <div style="flex:1"><p class="item-name">${it.name}</p>${it.note?`<p class="item-note">${it.note}</p>`:""}</div>
+    <span class="item-risk" style="color:${r.color}">${r.label}</span>
+  </div>`;
+}
+
+function renderOggi(){
+  const meal = state.meal;
+  const cats = CATEGORIES.filter(c=>c.id!=="condimenti");
+  return `
+  <div class="toprow">
+    <div class="segmented">
+      <button class="seg ${meal==='pranzo'?'active':''}" data-setmeal="pranzo">☀️ Pranzo</button>
+      <button class="seg ${meal==='cena'?'active':''}" data-setmeal="cena">🌙 Cena</button>
+    </div>
+    <button class="resetbtn" data-reset="1">↺ Reset</button>
+  </div>
+  ${cats.map(c=>mealCard(c,meal)).join("")}
+  `;
+}
+
+function mealCard(cat, meal){
+  const open = !!state.openCard[cat.id+meal];
+  if(cat.always){
+    return `<div class="card">
+      <div class="cardhead" data-toggle="${cat.id}${meal}">
+        <div class="left"><span class="ic-circle">${cat.icon}</span>
+          <div><p class="cardtitle">${cat.label}</p><p class="cardsub">Sempre disponibili</p></div>
+        </div>
+        <span class="chev">${open?"▴":"▾"}</span>
+      </div>
+      ${open?`<div class="itemlist">${cat.items.map(itemRow).join("")}</div>`:""}
+    </div>`;
+  }
+  const target = TARGETS[cat.id] ? TARGETS[cat.id][meal] : undefined;
+  if(target === 0){
+    return `<div class="card dim">
+      <div class="cardhead"><div class="left"><span class="ic-circle dim">${cat.icon}</span>
+        <div><p class="cardtitle" style="color:#a8a29e">${cat.label}</p><p class="cardsub dim">Mai a ${meal}</p></div></div>
+      </div></div>`;
+  }
+  if(target === null || target === undefined){
+    return `<div class="card">
+      <div class="cardhead" data-toggle="${cat.id}${meal}">
+        <div class="left"><span class="ic-circle">${cat.icon}</span>
+          <div><p class="cardtitle">${cat.label}</p><p class="cardsub">Sempre disponibili a ${meal}</p></div>
+        </div>
+        <span class="chev">${open?"▴":"▾"}</span>
+      </div>
+      ${open?`<div class="itemlist">${cat.items.map(itemRow).join("")}</div>`:""}
+    </div>`;
+  }
+  const count = (state.counts[cat.id] && state.counts[cat.id][meal]) || 0;
+  const pct = Math.min(100, (count/target)*100);
+  return `<div class="card">
+    <div class="cardhead">
+      <div class="left"><span class="ic-circle">${cat.icon}</span>
+        <div><p class="cardtitle">${cat.label}</p><p class="cardsub muted">${count} / ${target} questa settimana</p></div>
+      </div>
+      <div class="counters">
+        <button class="roundbtn" data-bump="${cat.id}" data-meal="${meal}" data-delta="-1">−</button>
+        <button class="roundbtn plus" data-bump="${cat.id}" data-meal="${meal}" data-delta="1">+</button>
+      </div>
+    </div>
+    <div class="progress ${count>=target?'full':''}"><div style="width:${pct}%"></div></div>
+    <button class="examplesbtn" data-toggle="${cat.id}${meal}">Esempi alimenti ${open?"▴":"▾"}</button>
+    ${open?`<div class="itemlist">${cat.items.map(itemRow).join("")}</div>`:""}
+  </div>`;
+}
+
+function renderAlimenti(){
+  const q = state.query.trim().toLowerCase();
+  const blocks = CATEGORIES.map(cat=>{
+    const items = q ? cat.items.filter(it=>it.name.toLowerCase().includes(q)) : cat.items;
+    if(q && items.length===0) return "";
+    const isOpen = q ? true : !!state.openAlim[cat.id];
+    return `<div class="card">
+      <div class="cardhead" data-alimtoggle="${cat.id}">
+        <div class="left"><span class="ic-circle" style="background:#f0eee9;color:#57534e">${cat.icon}</span><p class="cardtitle">${cat.label}</p></div>
+        ${q?"":`<span class="chev">${isOpen?"▴":"▾"}</span>`}
+      </div>
+      ${cat.rule && isOpen?`<div class="rule">ℹ️ ${cat.rule}</div>`:""}
+      ${isOpen?`<div class="itemlist">${items.map(itemRow).join("")}</div>`:""}
+    </div>`;
+  }).join("");
+  return `
+    <div class="search"><span>🔍</span><input id="searchbox" placeholder="Cerca un alimento..." value="${state.query.replace(/"/g,'&quot;')}"></div>
+    ${blocks}
+    <div class="legend">
+      ${Object.entries(RISK).map(([k,r])=>`<span class="legendchip"><span class="dot" style="background:${r.color};width:7px;height:7px"></span>${r.label}</span>`).join("")}
+    </div>
+  `;
+}
+
+function renderAlcol(){
+  return `
+  <div class="card">
+    <div class="alcohead"><span class="ic-circle">🍺</span><p class="cardtitle">Birra: 5 leve da usare</p></div>
+    <ul class="alcolist">
+      <li><span class="alcosparkle">✨</span><span><b>Carbonatazione:</b> versala nel bicchiere, falla "respirare" un minuto, bevi a piccoli sorsi e non a stomaco vuoto.</span></li>
+      <li><span class="alcosparkle">✨</span><span><b>Volume:</b> 1 media (33cl) a occasione è meglio di mezzo litro+.</span></li>
+      <li><span class="alcosparkle">✨</span><span><b>Alterna:</b> su 2-3 occasioni/settimana, sostituiscine una con vino secco o un distillato liscio.</span></li>
+      <li><span class="alcosparkle">✨</span><span><b>Tipo:</b> artigianali poco gassate o "in fusto" spesso gonfiano meno di quelle frizzanti.</span></li>
+      <li><span class="alcosparkle">✨</span><span><b>Timing:</b> evitala insieme a pasti ricchi di legumi o cereali abbondanti.</span></li>
+    </ul>
+  </div>
+  <div class="card greencard">
+    <div class="cardhead" style="cursor:default"><div class="left"><span class="ic-circle">🍷</span><p class="cardtitle">Scelte più "gentili"</p></div></div>
+    <p class="body">Vino secco (rosso, bianco, rosato, spumante secco, ~150ml) e distillati puri — vodka, gin, whisky, tequila, brandy.</p>
+  </div>
+  <div class="card redcard">
+    <div class="cardhead" style="cursor:default"><div class="left"><span class="ic-circle">🍸</span><p class="cardtitle">Da evitare comunque</p></div></div>
+    <p class="body">Vini dolci/liquorosi (porto, sherry, vini da dessert), cocktail con succhi concentrati o bibite gassate zuccherate, mixer "senza zucchero" con polioli.</p>
+  </div>
+  <div class="footnote">✓ Hai escluso intolleranze/patologie con i controlli medici: il gonfiore generale risponde meglio a una riduzione del carico complessivo che a colpire un solo alimento.</div>
+  `;
+}
+
+function renderRecupero(){
+  const stasera = [
+    "Acqua abbondante prima di dormire (l'alcol disidrata)",
+    "10-15 minuti di passeggiata dopo cena, anche corta",
+    "Non sdraiarti subito: aspetta almeno 1-2 ore",
+    "Stop a birra/bibite gassate per il resto della serata",
+  ];
+  const domattina = [
+    "Acqua appena svegli",
+    "Tisana digestiva: menta piperita o zenzero, se ti piace",
+    "Ascolta la fame reale: non serve saltare la colazione",
+  ];
+  const domani = [
+    "Torna alla lista a basso impatto: riso/patate, proteine magre, verdure preferite",
+    "Niente altri trigger nello stesso giorno: no cipolla/aglio, no altri fritti, no birra",
+    "Allenamento ok se previsto: intensità moderata, tanta acqua",
+  ];
+  const checklist = (id, items) => `<div class="checklist">${items.map((t,i)=>{
+    const key = id+i, done = !!state.checked[key];
+    return `<div class="check-item ${done?'done':''}" data-check="${key}">
+      <span class="check-box">${done?'✓':''}</span><span class="check-text">${t}</span>
+    </div>`;
+  }).join("")}</div>`;
+
+  return `
+  <div class="introcard">
+    <p>Pizza, fritto e qualche birra in più: gonfiano per <b>4 motivi insieme</b> — volume del pasto, grassi che rallentano lo svuotamento gastrico, glutine/lattosio della pizza e carbonatazione della birra. Non è un problema, è normale. Ecco come farla passare prima.</p>
+  </div>
+
+  <p class="sectionlabel">Stasera, appena puoi</p>
+  ${checklist("stasera", stasera)}
+
+  <p class="sectionlabel">Domani mattina</p>
+  ${checklist("mattina", domattina)}
+
+  <p class="sectionlabel">Pasti di domani</p>
+  ${checklist("domani", domani)}
+
+  <div class="calmcard">
+    <p class="cardtitle">Cosa NON serve fare</p>
+    <p>Non serve saltare pasti, allenarti più del solito o "punire" la serata di ieri. Un pasto pesante isolato non vanifica nulla: va solo lasciato smaltire con calma, tornando alla normalità dal pasto successivo.</p>
+  </div>
+  <div class="footnote">✓ Una camminata di 10-15 minuti dopo i pasti ha mostrato in uno studio clinico un effetto sul gonfiore funzionale pari o superiore ai farmaci procinetici.</div>
+  `;
+}
+
+
+function renderAllenamenti(){
+  return `
+  <div class="introcard">
+    <p>Corri sempre a stomaco vuoto la mattina presto: i due pasti che contano davvero sono <b>la cena della sera prima</b> e <b>il pranzo dopo la corsa</b>. La colazione pre-corsa, nel tuo caso, non è nell'equazione.</p>
+  </div>
+
+  <div class="card">
+    <div class="cardhead" style="cursor:default"><div class="left"><span class="ic-circle">🌙</span>
+      <div><p class="cardtitle">La sera prima</p><p class="cardsub muted">Il pasto che conta di più</p></div>
+    </div></div>
+    <p class="cardbody">Punta su carboidrati a basso impatto come riso o patate (meglio della pasta integrale, più ricca di fibre insolubili che possono disturbare la mattina dopo), una porzione di proteina magra (uova, tofu, formaggi stagionati) e verdure cotte invece di crude abbondanti. Evita legumi (mai a cena nel tuo schema), fritti e alcol nelle sere prima di un allenamento importante — rallenta il recupero muscolare. Finisci di cenare almeno 2-3 ore prima di andare a dormire. Se il giorno dopo ti aspetta una corsa lunga o un allenamento di qualità, alza leggermente la quota di carboidrati rispetto a una cena normale.</p>
+  </div>
+
+  <div class="card">
+    <div class="cardhead" style="cursor:default"><div class="left"><span class="ic-circle">🏃</span>
+      <div><p class="cardtitle">La mattina, a stomaco vuoto</p><p class="cardsub muted">Nessun cambiamento necessario</p></div>
+    </div></div>
+    <p class="cardbody">Per le uscite normali (fino a 60-75 minuti) correre a digiuno è una pratica diffusa e sicura, soprattutto se ti sei alimentato bene la sera prima: continua così. Un bicchiere d'acqua prima di uscire va sempre bene. Solo per le corse lunghe o particolarmente intense in ottica maratona, se senti il bisogno, un piccolo spuntino veloce (un sorso di succo diluito, una banana piccola, un cucchiaino di miele) può aiutare — ma è un'opzione, non un obbligo.</p>
+  </div>
+
+  <div class="card">
+    <div class="cardhead" style="cursor:default"><div class="left"><span class="ic-circle">☀️</span>
+      <div><p class="cardtitle">Il pranzo dopo</p><p class="cardsub muted">Il vero pasto di recupero</p></div>
+    </div></div>
+    <p class="cardbody">È il pasto che ricarica davvero: punta a mangiare entro 1-2 ore dal rientro. Carboidrati in porzione piena — riso, patate o pasta, di più nei giorni di corsa lunga — più 20-30g circa di proteine da uova, tofu o formaggi stagionati per il recupero muscolare, verdure a basso impatto e buona idratazione (un pizzico di sale in più se la corsa era lunga o faceva caldo). Non è il pasto da "alleggerire" pensando di aver già bruciato calorie: è il contrario, è il più importante della giornata per recuperare bene.</p>
+  </div>
+
+  <div class="sourcelist">Fonti: ACSM/AND Position Stand (Thomas et al., 2016) · Periodizzazione dei carboidrati (Burke, 2007) · ISSN Position Stand on Nutrient Timing (Kerksick et al., 2017) · FODMAP e sintomi gastrointestinali da esercizio (Lis et al.)</div>
+  `;
+}
+
+function renderIntegratori(){
+  const sup = (icon, title, badge, badgeType, body) => `
+    <div class="card">
+      <div class="cardhead" style="cursor:default"><div class="left">
+        <span class="ic-circle" ${badgeType==="warn"?'style="background:var(--warn-soft);color:var(--warn)"':""}>${icon}</span>
+        <p class="cardtitle">${title}</p>
+      </div></div>
+      <p class="cardbody">${body}</p>
+      <span class="${badgeType==="warn"?"warnbadge":"dosebadge"}">${badge}</span>
+    </div>`;
+
+  return `
+  <div class="introcard">
+    <p>Tutto quello che trovi qui è <b>legale</b>: nutrienti naturali o integratori da banco regolarmente in commercio, nessuna sostanza dopante o proibita. Per ferro e B12 in particolare, fai prima un esame del sangue e parlane con un medico — vanno integrati solo se servono davvero, non "per sicurezza".</p>
+  </div>
+
+  ${sup("🩸","Vitamina B12","Solo se carenza confermata","warn","Mangiando uova e latticini il rischio è più basso rispetto a una dieta vegana, ma resta una vitamina da monitorare con un esame periodico, soprattutto con un carico di allenamento alto. Se carente, integrazione orale standard su indicazione medica.")}
+
+  ${sup("🥬","Ferro","Solo dopo esame ferritina","warn","I runner hanno un rischio aggiunto di bassi livelli di ferro per micro-perdite legate allo sforzo. Il ferro vegetale si assorbe meno: abbinalo a fonti di vitamina C (peperone, kiwi, limone) ed evita caffè/tè vicino ai pasti ricchi di ferro. Il dosaggio va deciso con un medico in base ai valori del sangue — non c'è una dose generica sicura per tutti.")}
+
+  ${sup("☀️","Vitamina D","1000-2000 UI/die (valuta con esame)","ok","Livelli bassi sono comuni soprattutto con poca esposizione solare, specie nei mesi invernali. È generalmente sicura da integrare a dosi moderate; ideale verificare il valore nel sangue per tarare la dose.")}
+
+  ${sup("🐟","Omega-3 (EPA/DHA)","Da alghe, fonte vegetariana","ok","Mangiando pesce solo ~10 volte/anno, gli omega-3 a catena lunga sono scarsi nella tua dieta. Quelli vegetali (semi di lino, noci) si convertono poco in EPA/DHA: un integratore a base di alghe è l'opzione vegetariana più efficace.")}
+
+  ${sup("💪","Creatina monoidrato","3-5g/die, tutti i giorni","ok","È l'integratore ergogenico legale più studiato in assoluto (ISSN), sicuro anche nel lungo periodo. I vegetariani partono spesso con riserve muscolari di creatina più basse, quindi possono trarne un beneficio relativo maggiore. Non serve la fase di carico: bastano 3-5g/giorno con costanza, in qualsiasi momento della giornata, con un bicchiere d'acqua in più.")}
+
+  ${sup("🧂","Sali minerali / elettroliti","Nei giorni di corsa lunga o caldo","ok","Utili per prevenire crampi nelle sessioni più lunghe o con sudorazione abbondante. Controlla l'etichetta: alcune polveri contengono dolcificanti polialcoli (sorbitolo, xilitolo) che possono gonfiare — meglio evitarli.")}
+
+  ${sup("☕","Caffeina","100-200mg, opzionale","ok","Tra gli ergogenici legali più studiati: può aiutare in sessioni lunghe o di qualità. Testala sempre in allenamento prima, mai per la prima volta il giorno di una gara, e tieni conto della tua tolleranza intestinale — in alcune persone può accentuare il gonfiore.")}
+
+  ${sup("🥤","Proteine in polvere","Solo se serve, non essenziale","ok","Se con la dieta raggiungi già 1.6-1.8g/kg/die di proteine, non ti serve. Se vuoi un aiuto pratico, whey (visto che mangi latticini) o un mix vegetale vanno bene — controlla solo che non contengano inulina/FOS o polioli come riempitivi, spesso presenti nelle barrette proteiche.")}
+
+  <div class="sourcelist">Fonti: Kreider et al., ISSN Position Stand on Creatine, J Int Soc Sports Nutr, 2017 · Jäger et al., ISSN Position Stand on Protein, 2017 · Rogerson, Vegan diets: practical advice for athletes, J Int Soc Sports Nutr, 2017 · Revisioni su micronutrienti in atleti vegetariani/vegani (B12, ferro, omega-3, vitamina D)<br><br>Questa sezione è informativa e non sostituisce il parere di un medico o di un nutrizionista sportivo, soprattutto per i dosaggi di ferro e B12.</div>
+  `;
+}
+
+function renderAltroMenu(){
+  const items = [
+    {id:"alcol", icon:"🍺", title:"Alcol", sub:"Birra, vino, gestione"},
+    {id:"recupero", icon:"🔄", title:"Recupero", sub:"Serate impegnative"},
+    {id:"integratori", icon:"💊", title:"Integratori", sub:"Legali, no doping"},
+  ];
+  return items.map(it=>`
+    <div class="menuitem" data-altroopen="${it.id}">
+      <div class="left"><span class="ic-circle">${it.icon}</span>
+        <div><p class="menutitle">${it.title}</p><p class="menusub">${it.sub}</p></div>
+      </div>
+      <span class="chev">›</span>
+    </div>`).join("");
+}
+
+function renderAltro(){
+  if(!state.altroView) return renderAltroMenu();
+  const titles = {alcol:"Alcol", recupero:"Recupero", integratori:"Integratori"};
+  const backrow = `<div class="backrow" data-altroback="1"><span class="arrow">←</span><span class="label">${titles[state.altroView]}</span></div>`;
+  let body = "";
+  if(state.altroView==="alcol") body = renderAlcol();
+  else if(state.altroView==="recupero") body = renderRecupero();
+  else body = renderIntegratori();
+  return backrow + body;
+}
+
+function renderSpesa(){
+  const weekDates = getWeekDates();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const chips = weekDates.map((d,i)=>{
+    const isToday = d.getTime()===today.getTime();
+    const picked = state.spesaDay===i;
+    return `<div class="daychip ${isToday?'istoday':''} ${picked?'picked':''}" data-pickday="${i}">
+      <span class="daychip-name">${DAY_NAMES[i]}</span><span class="daychip-num">${d.getDate()}</span>
+    </div>`;
+  }).join("");
+
+  const grouped = {};
+  state.spesaItems.forEach(it=>{ (grouped[it.cat] = grouped[it.cat]||[]).push(it); });
+  const listHtml = SPESA_CAT_ORDER.filter(c=>grouped[c]&&grouped[c].length).map(cat=>{
+    const rows = grouped[cat].map(it=>`
+      <div class="check-item ${it.checked?'done':''}" data-checkspesa="${it.id}">
+        <span class="check-box">${it.checked?'✓':''}</span>
+        <span class="check-text">${it.name}</span>
+        ${it.custom?`<span class="delbtn" data-delspesa="${it.id}">✕</span>`:""}
+      </div>`).join("");
+    return `<p class="sectionlabel">${cat}</p><div class="checklist">${rows}</div>`;
+  }).join("");
+
+  const next = nextOccurrence(state.spesaDay);
+  const nextLabel = "Promemoria: " + next.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"}) + ", 18:00";
+
+  return `
+  <div class="card">
+    <div class="cardhead" style="cursor:default"><div class="left"><span class="ic-circle">🛒</span>
+      <div><p class="cardtitle">Giorno della spesa</p><p class="cardsub muted">${nextLabel}</p></div>
+    </div></div>
+    <div class="weekrow">${chips}</div>
+    <div class="calbuttons">
+      <button class="calbtn" data-addgcal="1">📅 Aggiungi a Google Calendar</button>
+      <button class="calbtn outline" data-addics="1">⬇️ Scarica promemoria (.ics per Apple/Outlook)</button>
+    </div>
+  </div>
+
+  ${listHtml}
+
+  <div class="addrow">
+    <input id="spesa-input" placeholder="Aggiungi un alimento..." value="${(state.spesaInput||"").replace(/"/g,'&quot;')}">
+    <button data-addspesa="1">+</button>
+  </div>
+  <button class="resetbtn" style="margin:14px 2px 0" data-resetspesa="1">↺ Ripristina lista base</button>
+  <div class="footnote" style="padding-top:14px">✓ L'orario (18:00) è un default: una volta salvato l'evento puoi cambiarlo liberamente dal tuo calendario.</div>
+  `;
+}
+
+
+function render(){
+  const content = document.getElementById("content");
+  if(state.tab==="oggi") content.innerHTML = renderOggi();
+  else if(state.tab==="alimenti") content.innerHTML = renderAlimenti();
+  else if(state.tab==="allenamenti") content.innerHTML = renderAllenamenti();
+  else if(state.tab==="spesa") content.innerHTML = renderSpesa();
+  else content.innerHTML = renderAltro();
+
+  document.querySelectorAll(".navbtn").forEach(b=>{
+    b.classList.toggle("active", b.dataset.tab===state.tab);
+  });
+
+  if(state.tab==="alimenti"){
+    const box = document.getElementById("searchbox");
+    if(box){
+      box.focus();
+      const len = box.value.length;
+      box.setSelectionRange(len,len);
+    }
+  }
+}
+
+document.querySelectorAll(".navbtn").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    const t = b.dataset.tab;
+    if(t==="altro") state.altroView = null;
+    state.tab = t;
+    render();
+  });
+});
+
+document.getElementById("content").addEventListener("click", (e)=>{
+  const check = e.target.closest("[data-check]");
+  if(check){ const k = check.dataset.check; state.checked[k] = !state.checked[k]; render(); return; }
+
+  const setmeal = e.target.closest("[data-setmeal]");
+  if(setmeal){ state.meal = setmeal.dataset.setmeal; render(); return; }
+
+  const reset = e.target.closest("[data-reset]");
+  if(reset){ state.counts = emptyCounts(); saveStorage(); render(); return; }
+
+  const bump = e.target.closest("[data-bump]");
+  if(bump){
+    const cat = bump.dataset.bump, meal = bump.dataset.meal, delta = parseInt(bump.dataset.delta,10);
+    const cur = (state.counts[cat] && state.counts[cat][meal]) || 0;
+    state.counts[cat] = Object.assign({}, state.counts[cat], {[meal]: Math.max(0, cur+delta)});
+    saveStorage(); render(); return;
+  }
+
+  const toggle = e.target.closest("[data-toggle]");
+  if(toggle){
+    const k = toggle.dataset.toggle;
+    state.openCard[k] = !state.openCard[k];
+    render(); return;
+  }
+
+  const alimtoggle = e.target.closest("[data-alimtoggle]");
+  if(alimtoggle){
+    const k = alimtoggle.dataset.alimtoggle;
+    state.openAlim[k] = !state.openAlim[k];
+    render(); return;
+  }
+
+  const altroopen = e.target.closest("[data-altroopen]");
+  if(altroopen){ state.altroView = altroopen.dataset.altroopen; render(); return; }
+
+  const altroback = e.target.closest("[data-altroback]");
+  if(altroback){ state.altroView = null; render(); return; }
+
+  const pickday = e.target.closest("[data-pickday]");
+  if(pickday){ state.spesaDay = parseInt(pickday.dataset.pickday,10); saveSpesaDay(); render(); return; }
+
+  const addgcal = e.target.closest("[data-addgcal]");
+  if(addgcal){ openGoogleCalendar(); return; }
+
+  const addics = e.target.closest("[data-addics]");
+  if(addics){ downloadICS(); return; }
+
+  const delspesa = e.target.closest("[data-delspesa]");
+  if(delspesa){
+    const id = delspesa.dataset.delspesa;
+    state.spesaItems = state.spesaItems.filter(it=>it.id!==id);
+    saveSpesa(); render(); return;
+  }
+
+  const checkspesa = e.target.closest("[data-checkspesa]");
+  if(checkspesa){
+    const id = checkspesa.dataset.checkspesa;
+    const it = state.spesaItems.find(x=>x.id===id);
+    if(it) it.checked = !it.checked;
+    saveSpesa(); render(); return;
+  }
+
+  const addspesa = e.target.closest("[data-addspesa]");
+  if(addspesa){ addCustomSpesaItem(); return; }
+
+  const resetspesa = e.target.closest("[data-resetspesa]");
+  if(resetspesa){ state.spesaItems = freshSpesaItems(); saveSpesa(); render(); return; }
+});
+
+document.getElementById("content").addEventListener("input", (e)=>{
+  if(e.target.id==="searchbox"){ state.query = e.target.value; render(); }
+  if(e.target.id==="spesa-input"){ state.spesaInput = e.target.value; }
+});
+
+document.getElementById("content").addEventListener("keydown", (e)=>{
+  if(e.target.id==="spesa-input" && e.key==="Enter"){ e.preventDefault(); addCustomSpesaItem(); }
+});
+
+render();
+</script>
+</body>
+</html>
