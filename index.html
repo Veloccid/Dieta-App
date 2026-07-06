@@ -27,9 +27,9 @@
   h1{font-family:Georgia,serif;font-size:18px;margin:0;letter-spacing:-.2px;line-height:1.2;}
   .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin:2px 0 0;}
   main{flex:1;padding:0 20px 100px;}
-  nav.bottomnav{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 10px calc(8px + env(safe-area-inset-bottom));}
-  .navbtn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;padding:6px 6px;cursor:pointer;color:var(--ink-soft);font-size:10px;}
-  .navbtn .ic{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;}
+  nav.bottomnav{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 4px calc(6px + env(safe-area-inset-bottom));}
+  .navbtn{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;padding:4px 3px;cursor:pointer;color:var(--ink-soft);font-size:9px;}
+  .navbtn .ic{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;}
   .navbtn.active{color:var(--brand);font-weight:600;}
   .navbtn.active .ic{background:var(--brand);color:#fff;}
 
@@ -133,6 +133,16 @@
   .sourcelist{font-size:10.5px;color:#b5b1ab;line-height:1.7;padding:6px 4px 22px;}
 
   .delbtn{margin-left:auto;color:#c4c0bb;font-size:14px;padding:2px 4px;flex-shrink:0;}
+
+  .genbtn{width:100%;border:none;border-radius:16px;padding:14px;font-size:15px;font-weight:700;background:var(--brand);color:#fff;cursor:pointer;letter-spacing:.01em;margin-bottom:14px;}
+  .genbtn:active{opacity:.85;}
+  .riccard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;}
+  .ricmeta{font-size:11.5px;color:var(--ink-soft);margin:4px 0 10px;}
+  .ricstep{display:flex;gap:10px;margin-bottom:8px;font-size:13.5px;line-height:1.45;}
+  .stepnum{width:20px;height:20px;border-radius:50%;background:var(--brand-soft);color:var(--brand);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .ricnota{font-size:11.5px;background:#f7f6f4;border-radius:10px;padding:8px 10px;color:#57534e;margin-top:8px;}
+  .inglist{font-size:13px;color:#44403c;line-height:1.8;padding:4px 0 8px;}
+  .emptyrec{text-align:center;padding:40px 20px;color:var(--ink-soft);font-size:14px;}
 </style>
 </head>
 <body>
@@ -148,6 +158,7 @@
   <nav class="bottomnav">
     <button class="navbtn" data-tab="oggi"><span class="ic">☀️</span>Oggi</button>
     <button class="navbtn" data-tab="alimenti"><span class="ic">🔍</span>Alimenti</button>
+    <button class="navbtn" data-tab="ricette"><span class="ic">🍳</span>Ricette</button>
     <button class="navbtn" data-tab="allenamenti"><span class="ic">🏃</span>Corsa</button>
     <button class="navbtn" data-tab="spesa"><span class="ic">🛒</span>Spesa</button>
     <button class="navbtn" data-tab="altro"><span class="ic">⋯</span>Altro</button>
@@ -335,7 +346,9 @@ let state = {
   spesaItems: freshSpesaItems(),
   spesaDay: todayIndex(),
   spesaInput: "",
-  altroView: null, // null | "alcol" | "recupero" | "integratori"
+  altroView: null,
+  ricettaMeal: (new Date().getHours() < 15 ? "pranzo" : "cena"),
+  ricettaIdx: null,
 };
 
 (function loadStorage(){
@@ -408,6 +421,7 @@ function renderOggi(){
     <button class="resetbtn" data-reset="1">↺ Reset</button>
   </div>
   ${cats.map(c=>mealCard(c,meal)).join("")}
+  <div class="sourcelist" style="padding-top:4px">Le frequenze settimanali si basano su: Gibson PR & Shepherd SJ, <i>FODMAP approach</i>, J Gastroenterol Hepatol, 2010 · Halmos EP et al., Gastroenterology, 2014 · Jäger R et al., <i>ISSN Protein Position Stand</i>, J Int Soc Sports Nutr, 2017 (target 1.6-1.8g/kg/die) · Thomas DT et al., <i>ACSM/AND Position Stand: Nutrition and Athletic Performance</i>, 2016.</div>
   `;
 }
 
@@ -481,6 +495,7 @@ function renderAlimenti(){
     <div class="legend">
       ${Object.entries(RISK).map(([k,r])=>`<span class="legendchip"><span class="dot" style="background:${r.color};width:7px;height:7px"></span>${r.label}</span>`).join("")}
     </div>
+    <div class="sourcelist">Fonti: Gibson PR & Shepherd SJ, <i>Evidence-based dietary management of functional gastrointestinal symptoms: the FODMAP approach</i>, J Gastroenterol Hepatol, 2010 · Halmos EP et al., <i>A diet low in FODMAPs reduces symptoms of IBS</i>, Gastroenterology, 2014 · Monash University FODMAP Blog — porzioni di legumi in scatola · PMC/NCBI — <i>Lactose Residual Content in PDO Cheeses</i> (Parmigiano Reggiano e Grana Padano)</div>
   `;
 }
 
@@ -505,6 +520,7 @@ function renderAlcol(){
     <p class="body">Vini dolci/liquorosi (porto, sherry, vini da dessert), cocktail con succhi concentrati o bibite gassate zuccherate, mixer "senza zucchero" con polioli.</p>
   </div>
   <div class="footnote">✓ Hai escluso intolleranze/patologie con i controlli medici: il gonfiore generale risponde meglio a una riduzione del carico complessivo che a colpire un solo alimento.</div>
+  <div class="sourcelist">Fonti: Gibson & Shepherd, J Gastroenterol Hepatol, 2010 · Halmos et al., Gastroenterology, 2014 · Braganza SF et al., revisioni su alcol e sintomi gastrointestinali funzionali · Nota sulla carbonatazione: la CO₂ si libera direttamente nel tratto GI, aumentando la distensione intestinale indipendentemente dal contenuto FODMAP della bevanda (Barrett JS et al.)</div>
   `;
 }
 
@@ -626,6 +642,7 @@ function renderAltroMenu(){
   const items = [
     {id:"alcol", icon:"🍺", title:"Alcol", sub:"Birra, vino, gestione"},
     {id:"recupero", icon:"🔄", title:"Recupero", sub:"Serate impegnative"},
+    {id:"dolci", icon:"🍦", title:"Dolci e Gelato", sub:"Cosa scegliere, cosa evitare"},
     {id:"integratori", icon:"💊", title:"Integratori", sub:"Legali, no doping"},
   ];
   return items.map(it=>`
@@ -639,13 +656,111 @@ function renderAltroMenu(){
 
 function renderAltro(){
   if(!state.altroView) return renderAltroMenu();
-  const titles = {alcol:"Alcol", recupero:"Recupero", integratori:"Integratori"};
+  const titles = {alcol:"Alcol", recupero:"Recupero", dolci:"Dolci e Gelato", integratori:"Integratori"};
   const backrow = `<div class="backrow" data-altroback="1"><span class="arrow">←</span><span class="label">${titles[state.altroView]}</span></div>`;
   let body = "";
   if(state.altroView==="alcol") body = renderAlcol();
   else if(state.altroView==="recupero") body = renderRecupero();
+  else if(state.altroView==="dolci") body = renderDolci();
   else body = renderIntegratori();
   return backrow + body;
+}
+
+function renderDolci(){
+  const row = (risk, name, note) => {
+    const cfg = {ok:{c:"var(--ok)",l:"Via libera"}, mod:{c:"var(--warn)",l:"Attenzione"}, bad:{c:"var(--bad)",l:"Limita/evita"}};
+    const r = cfg[risk];
+    return `<div class="item"><span class="dot" style="background:${r.c}"></span><div style="flex:1"><p class="item-name">${name}</p>${note?`<p class="item-note">${note}</p>`:""}</div><span class="item-risk" style="color:${r.c}">${r.l}</span></div>`;
+  };
+  return `
+  <div class="introcard">
+    <p>La regola più importante sui dolci e sul gonfiore: <b>"senza zucchero" non significa senza FODMAP</b>. I dolcificanti polialcoli (sorbitolo, maltitolo, xilitolo, mannitolo) usati in gran parte dei prodotti "light" e "diet" sono tra i trigger più potenti di gonfiore e crampi intestinali. Il saccarosio normale (zucchero da tavola), in quantità ragionevole, è molto meno problematico.</p>
+  </div>
+
+  <p class="sectionlabel">Dolci — semaforo</p>
+  <div class="card">
+    <div class="itemlist">
+      ${row("ok","Cioccolato fondente ≥70%, max 30g","A questa porzione è classificato low-FODMAP (Monash University). Oltre i 30g il lattosio residuo e i fruttani iniziano a salire.")}
+      ${row("ok","Crostata di fragole o lamponi (piccola porzione)","Frutta a basso fruttosio; base di pasta frolla con zucchero normale è tollerata in porzione.")}
+      ${row("ok","Biscotti semplici a base di riso o avena","Preferibili ai biscotti di frumento in grandi porzioni.")}
+      ${row("ok","Zucchero semolato, zucchero di canna","Saccarosio: non è un FODMAP, in quantità normali non gonfierà l'intestino.")}
+      ${row("mod","Cioccolato al latte, cioccolato bianco","Contengono più lattosio e spesso sorbitolo come dolcificante aggiunto. Porzione piccola, verifica etichetta.")}
+      ${row("mod","Biscotti integrali / farro / frumento, porzione piccola","I fruttani del frumento aumentano con la quantità: 1-2 biscotti ok, non l'intero pacchetto.")}
+      ${row("mod","Crostata con marmellata di frutti rossi","Ok se la marmellata non è con mele/pere o sciroppo di agave. Ricotta come farcitura: limitare.")}
+      ${row("bad","Qualsiasi dolce con miele o sciroppo d'agave","Miele e agave: altissimo contenuto di fruttosio libero — tra i trigger FODMAP più potenti.")}
+      ${row("bad","Dolci \"senza zucchero\" / \"light\" / \"diet\"","Spesso contengono maltitolo (E965), sorbitolo (E420) o xilitolo (E967): effetto lassativo e gonfiore garantiti.")}
+      ${row("bad","Crostata ricotta e visciole (o ciliegie)","Doppio trigger: ricotta alta in lattosio + visciole/ciliegie molto ricche di sorbitolo.")}
+      ${row("bad","Caramelle gommose, gomme da masticare","Quasi sempre polialcoli o sorbitolo. Le gomme da masticare senza zucchero in particolare.")}
+    </div>
+  </div>
+
+  <p class="sectionlabel">Gelato — guida pratica</p>
+  <div class="card">
+    <div class="itemlist">
+      ${row("ok","Sorbetto / granita di limone, fragola, lampone","Base: acqua + frutta + zucchero semolato. Niente lattosio, niente polialcoli se artigianale. La scelta migliore.")}
+      ${row("ok","Granita di caffè, mandorla (artigianale)","Ok se senza additivi o sciroppi.")}
+      ${row("mod","Gelato alla crema artigianale, 1 pallina","Ha del lattosio (panna, latte), ma meno di un latticino fresco. Una pallina in un'uscita occasionale è gestibile.")}
+      ${row("mod","Gelato industriale confezionato","Più additivi, spesso più lattosio e a volte polialcoli. Controlla sempre l'etichetta.")}
+      ${row("bad","Gelato \"senza zucchero\" / \"light\" / \"no sugar added\"","Quasi sempre maltitolo o sorbitolo come sostituto — peggio del gelato normale per il gonfiore.")}
+      ${row("bad","Gelato con miele, crema di nocciole con agave","Fruttosio libero in abbondanza.")}
+    </div>
+  </div>
+
+  <div class="calmcard" style="margin-top:4px">
+    <p class="cardtitle">Regola dei polialcoli — da memorizzare</p>
+    <p>Sull'etichetta cerca: sorbitolo (E420), mannitolo (E421), xilitolo (E967), maltitolo (E965), isomalt (E953), lattitolo (E966). Se ne trovi uno → meglio scegliere qualcosa d'altro. Questo vale per dolci, gomme, caramelle, "energy bar", yogurt light e gelati dietetici.</p>
+  </div>
+
+  <div class="sourcelist" style="margin-top:14px">Fonti: Halmos EP et al., <i>A diet low in FODMAPs reduces symptoms of IBS</i>, Gastroenterology, 2014 · Gibson PR & Shepherd SJ, J Gastroenterol Hepatol, 2010 · Monash University FODMAP App — dati su porzioni di cioccolato, frutta, sorbetto · Barrett JS et al., <i>Dietary poorly absorbed short-chain carbohydrates increase delivery of water and fermentable substrates to the proximal colon</i>, Aliment Pharmacol Ther, 2010 · Shepherd SJ et al., <i>Fructose malabsorption and symptoms of IBS</i>, Clin Gastroenterol Hepatol, 2006 · Staudacher HM et al., <i>Mechanisms and efficacy of dietary FODMAP restriction in IBS</i>, Nat Rev Gastroenterol Hepatol, 2017</div>
+  `;
+}
+
+const RICETTE = {
+  pranzo:[
+    {nome:"Riso con uova strapazzate e spinaci",tempo:"15 min",ingredienti:["Riso 90g (secco)","Uova 2","Spinaci freschi 100g","Olio EVO 10g","Parmigiano grattugiato 10g","Sale, pepe, noce moscata q.b."],passaggi:["Cuoci il riso in acqua salata, scola e tieni da parte.","In padella con olio fai appassire gli spinaci 3-4 minuti.","Aggiungi le uova e mescola per ottenere uova strapazzate morbide.","Unisci il riso, mescola bene e servi con Parmigiano."],nota:"Proteine ~26g · Carboidrati ~72g · Grassi ~18g — ideale come pranzo post-corsa.",fonti:"Kerksick et al., ISSN Nutrient Timing, 2017 · Halmos et al., Gastroenterology, 2014"},
+    {nome:"Pasta con tofu e peperoni",tempo:"20 min",ingredienti:["Pasta 85g","Tofu compatto 150g","Peperone giallo o rosso ½","Pomodori pelati 100g","Olio EVO 10g","Pecorino stagionato 15g","Basilico, sale, pepe q.b."],passaggi:["Taglia il tofu a cubetti e il peperone a listarelle.","Rosola il tofu in olio 3-4 minuti finché dorato, aggiungi il peperone.","Versa i pomodori pelati schiacciati, aggiusta di sale e cuoci 8 minuti.","Cuoci la pasta al dente, saltala nel sugo e servi con pecorino e basilico."],nota:"Proteine ~28g · Carboidrati ~82g · Grassi ~16g — tofu al posto della carne senza alzare il carico FODMAP.",fonti:"Gibson & Shepherd, J Gastroenterol Hepatol, 2010 · Jäger et al., ISSN, 2017"},
+    {nome:"Insalata di lenticchie e carote",tempo:"10 min",ingredienti:["Lenticchie in scatola sciacquate 40g","Carote 2 medie","Cetriolo ½","Feta 50g","Olio EVO 10g","Succo di limone, sale, cumino q.b."],passaggi:["Sciacqua bene le lenticchie in scatola e scolale.","Gratta le carote o tagliale a julienne. Taglia il cetriolo a rondelle.","Sbricola la feta sopra le verdure.","Condisci con olio, limone e un pizzico di cumino. Mescola e servi."],nota:"Proteine ~18g · Carboidrati ~30g · Grassi ~18g — lenticchie sciacquate: oligosaccaridi ridotti fino al 70% (Monash University).",fonti:"Monash University FODMAP blog · Gibson & Shepherd, 2010"},
+    {nome:"Patate al forno con uova e rosmarino",tempo:"35 min",ingredienti:["Patate 350g","Uova 2","Olio EVO 10g","Rosmarino fresco q.b.","Paprika dolce, sale, pepe q.b.","Parmigiano 15g"],passaggi:["Taglia le patate a cubetti, condisci con olio, sale, rosmarino e paprika.","Inforna a 200°C per 25 minuti, rigirando a metà.","A 5 minuti dalla fine crea due spazi tra le patate e rompi le uova direttamente dentro.","Rinforna finché l'albume è rappreso ma il tuorlo è ancora morbido. Servi con Parmigiano."],nota:"Proteine ~22g · Carboidrati ~65g · Grassi ~20g — le patate sono tra le fonti di carboidrati a minore carico FODMAP.",fonti:"Halmos et al., Gastroenterology, 2014 · Thomas et al., ACSM/AND, 2016"},
+    {nome:"Riso saltato con tofu e zucchine",tempo:"20 min",ingredienti:["Riso 90g (secco)","Tofu compatto 150g","Zucchine 2 piccole","Tamari (senza glutine) 1 cucchiaio","Olio EVO 10g","Zenzero fresco grattugiato, sesamo q.b."],passaggi:["Cuoci il riso e lascialo intiepidire (meglio del giorno prima).","Taglia il tofu a cubetti e le zucchine a dadini.","Rosola il tofu in olio caldo finché dorato, aggiungi le zucchine e cuoci 3 minuti.","Unisci il riso e il tamari, salta a fuoco alto. Servi con zenzero e sesamo."],nota:"Proteine ~24g · Carboidrati ~74g · Grassi ~15g — tamari: meno frumento della classica salsa di soia.",fonti:"Gibson & Shepherd, 2010 · Lis et al., Int J Sport Nutr, FODMAP ed esercizio"},
+  ],
+  cena:[
+    {nome:"Frittata di zucchine e pecorino",tempo:"15 min",ingredienti:["Uova 3","Zucchine 2 piccole","Pecorino stagionato grattugiato 20g","Olio EVO 10g","Menta fresca (opzionale), sale, pepe q.b."],passaggi:["Taglia le zucchine a rondelle sottili e rosolale in olio 5 minuti finché dorate.","Sbatti le uova con pecorino, sale e pepe.","Versa le uova sulle zucchine, cuoci con coperchio 4 minuti a fuoco medio.","Gira la frittata e finisci 2 minuti. Servi con foglie di menta."],nota:"Proteine ~28g · Grassi ~24g · Carboidrati ~5g — cena a basso carico di carboidrati, zero FODMAP rilevanti.",fonti:"Halmos et al., 2014 · Gibson & Shepherd, 2010 — pecorino stagionato: lattosio residuo quasi nullo (PMC/NCBI)"},
+    {nome:"Tofu al forno con melanzane e carote",tempo:"30 min",ingredienti:["Tofu compatto 200g","Melanzana 1 piccola","Carote 2","Olio EVO 10g","Tamari 1 cucchiaio","Paprika affumicata, cumino, sale q.b.","Succo di ½ limone"],passaggi:["Taglia il tofu a fette spesse 1 cm, marinalo 10 minuti con tamari, paprika e limone.","Taglia melanzane e carote a cubetti, condisci con olio e cumino.","Disponi tutto su una teglia con carta forno.","Cuoci a 200°C per 22 minuti, girando a metà. Servi con succo di limone extra."],nota:"Proteine ~24g · Grassi ~16g · Carboidrati ~18g — cena proteica a basso impatto FODMAP.",fonti:"Jäger et al., ISSN, 2017 · Halmos et al., 2014"},
+    {nome:"Uova al tegamino su spinaci e pomodori",tempo:"10 min",ingredienti:["Uova 2","Spinaci freschi 150g","Pomodori ciliegino 8","Olio EVO 10g","Parmigiano 15g","Basilico, sale, pepe q.b."],passaggi:["In padella con olio fai appassire gli spinaci 2-3 minuti, aggiungi i pomodori.","Crea due spazi tra le verdure e rompi le uova direttamente nella padella.","Copri con coperchio e cuoci 3-4 minuti finché l'albume è rappreso.","Servi con Parmigiano grattugiato, pepe e basilico."],nota:"Proteine ~22g · Grassi ~18g · Carboidrati ~8g — cena leggera, zero carboidrati aggiunti, ideale nei giorni di riposo.",fonti:"Gibson & Shepherd, 2010 · Thomas et al., ACSM/AND, 2016 — linee guida deficit calorico nei giorni di riposo"},
+    {nome:"Zucchine ripiene di tofu e feta",tempo:"35 min",ingredienti:["Zucchine 2 grandi","Tofu compatto 120g","Feta 40g","Pomodori pelati 50g","Olio EVO 10g","Origano, pepe q.b.","Pecorino stagionato 10g (per gratinare)"],passaggi:["Taglia le zucchine a metà nel senso della lunghezza e svuotale tenendo la polpa.","Sbriciola il tofu, uniscilo alla polpa di zucchine, ai pomodori schiacciati e alla feta sbriciolata.","Condisci con olio, origano e pepe. Riempi le zucchine.","Spolvera con pecorino e inforna a 190°C per 25 minuti."],nota:"Proteine ~26g · Grassi ~20g · Carboidrati ~12g — senza cereali, ideale nelle sere di riposo.",fonti:"Halmos et al., 2014 · PMC/NCBI su contenuto lattosio formaggi DOP"},
+    {nome:"Omelette di peperoni e caciocavallo",tempo:"12 min",ingredienti:["Uova 3","Peperone rosso ½","Caciocavallo stagionato 30g","Olive nere 6-8","Olio EVO 10g","Sale, pepe, origano q.b."],passaggi:["Taglia il peperone a listarelle sottili e rosolalo in olio per 5 minuti.","Sbatti le uova con sale e pepe, versale sui peperoni.","Distribuisci il caciocavallo a scaglie e le olive.","Cuoci 3 minuti su un lato, poi piega a metà e servi."],nota:"Proteine ~30g · Grassi ~26g · Carboidrati ~10g — caciocavallo stagionato: lattosio quasi assente.",fonti:"PMC/NCBI — Lactose residual content in PDO cheeses · Halmos et al., 2014"},
+  ]
+};
+
+function renderRicette(){
+  const meal = state.ricettaMeal;
+  const bank = RICETTE[meal];
+  const idx = state.ricettaIdx;
+  const r = (idx !== null && idx < bank.length) ? bank[idx] : null;
+
+  const recipeHtml = r ? `
+    <div class="riccard">
+      <p class="cardtitle" style="font-family:Georgia,serif;font-size:16px">${r.nome}</p>
+      <p class="ricmeta">⏱ ${r.tempo} &nbsp;·&nbsp; 1 porzione</p>
+      <p class="sectionlabel" style="margin-top:8px">Ingredienti</p>
+      <p class="inglist">${r.ingredienti.map(i=>"· "+i).join("<br>")}</p>
+      <p class="sectionlabel">Passaggi</p>
+      ${r.passaggi.map((p,i)=>`<div class="ricstep"><span class="stepnum">${i+1}</span><span>${p}</span></div>`).join("")}
+      <div class="ricnota">📊 ${r.nota}</div>
+      <div class="sourcelist" style="margin-top:6px">Fonti: ${r.fonti}</div>
+    </div>` : `<div class="emptyrec">🍳<br><br>Premi il pulsante per generare<br>una ricetta anti-gonfiore</div>`;
+
+  return `
+  <div class="toprow">
+    <div class="segmented">
+      <button class="seg ${meal==="pranzo"?"active":""}" data-setricmeal="pranzo">☀️ Pranzo</button>
+      <button class="seg ${meal==="cena"?"active":""}" data-setricmeal="cena">🌙 Cena</button>
+    </div>
+  </div>
+  <button class="genbtn" data-genera="1">🎲 Genera ricetta${r?" diversa":""}</button>
+  ${recipeHtml}
+  <div class="footnote">✓ Tutte le ricette escludono cipolla, aglio, latticini freschi, eccesso di legumi e altri trigger FODMAP.<br>Fonti: Gibson & Shepherd, J Gastroenterol Hepatol, 2010 · Halmos et al., Gastroenterology, 2014 · ISSN Position Stands (Jäger et al., 2017; Kreider et al., 2017).</div>
+  `;
 }
 
 function renderSpesa(){
@@ -694,6 +809,7 @@ function renderSpesa(){
   </div>
   <button class="resetbtn" style="margin:14px 2px 0" data-resetspesa="1">↺ Ripristina lista base</button>
   <div class="footnote" style="padding-top:14px">✓ L'orario (18:00) è un default: una volta salvato l'evento puoi cambiarlo liberamente dal tuo calendario.</div>
+  <div class="sourcelist">Gli alimenti in lista riflettono le categorie a basso carico FODMAP: Gibson & Shepherd, J Gastroenterol Hepatol, 2010 · Halmos et al., Gastroenterology, 2014 · Monash University FODMAP app (porzioni di legumi in scatola) · PMC/NCBI — <i>Lactose in PDO Cheeses</i> (formaggi stagionati) · Jäger et al., ISSN, 2017 (fabbisogno proteico vegetariano in allenamento).</div>
   `;
 }
 
@@ -702,6 +818,7 @@ function render(){
   const content = document.getElementById("content");
   if(state.tab==="oggi") content.innerHTML = renderOggi();
   else if(state.tab==="alimenti") content.innerHTML = renderAlimenti();
+  else if(state.tab==="ricette") content.innerHTML = renderRicette();
   else if(state.tab==="allenamenti") content.innerHTML = renderAllenamenti();
   else if(state.tab==="spesa") content.innerHTML = renderSpesa();
   else content.innerHTML = renderAltro();
@@ -796,6 +913,20 @@ document.getElementById("content").addEventListener("click", (e)=>{
 
   const resetspesa = e.target.closest("[data-resetspesa]");
   if(resetspesa){ state.spesaItems = freshSpesaItems(); saveSpesa(); render(); return; }
+
+  const setricmeal = e.target.closest("[data-setricmeal]");
+  if(setricmeal){ state.ricettaMeal = setricmeal.dataset.setricmeal; state.ricettaIdx = null; render(); return; }
+
+  const genera = e.target.closest("[data-genera]");
+  if(genera){
+    const bank = RICETTE[state.ricettaMeal];
+    const prev = state.ricettaIdx;
+    let next = prev;
+    while(next === prev && bank.length > 1){ next = Math.floor(Math.random()*bank.length); }
+    if(bank.length === 1) next = 0;
+    state.ricettaIdx = next;
+    render(); return;
+  }
 });
 
 document.getElementById("content").addEventListener("input", (e)=>{
